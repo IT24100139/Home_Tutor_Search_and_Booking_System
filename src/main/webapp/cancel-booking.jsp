@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cancel Booking</title>
     <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
-    <link rel="shortcut icon" href="favicon.icov=2">
+    <link rel="shortcut icon" href="favicon.ico?v=2">
     <link rel="apple-touch-icon" href="favicon.jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,11 +15,11 @@
 <body class="bg-gray-100">
 <div class="flex">
     <!-- Side Navigation -->
-    <aside class="fixed h-screen bg-blue-50 w-64 shadow-lg z-50">
+    <aside class="fixed h-screen bg-blue-50 w-64 shadow-lg z-50 md:block hidden" id="sidebar">
         <div class="flex items-center justify-center px-4 py-6">
             <div class="flex items-center justify-start w-full">
                 <img src="favicon.jpeg" alt="Logo" class="h-10 w-10 mr-3 rounded-lg">
-                <h2 class="text-xl font-bold text-gray-800 ">Zentutor.lk</h2>
+                <h2 class="text-xl font-bold text-gray-800">Zentutor.lk</h2>
             </div>
         </div>
         <nav class="mt-4">
@@ -37,8 +37,11 @@
             </a>
         </nav>
     </aside>
-    <main class="ml-64 flex-1">
-        <header class="fixed w-[calc(100%-16rem)] bg-white shadow-sm py-4 px-6 flex justify-end items-center z-40">
+    <button class="md:hidden p-4 bg-blue-500 text-white fixed top-0 left-0 z-50" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    <main class="md:ml-64 flex-1">
+        <header class="fixed w-full md:w-[calc(100%-16rem)] bg-white shadow-sm py-4 px-6 flex justify-end items-center z-40">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-3">
                     <img src="user.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
@@ -62,44 +65,31 @@
                     </div>
                 </c:if>
 
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold mb-2">${booking.subject}</h3>
+                    <p class="text-gray-600 mb-4">${booking.tutor}</p>
+                    <p class="text-gray-600">
+                        <strong>Date:</strong> ${booking.date} <br>
+                        <strong>Time:</strong> ${booking.time} <br>
+                        <strong>Duration:</strong> ${booking.duration}
+                    </p>
+                </div>
+
                 <form action="delete-booking" method="post" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                        <div class="bg-gray-100 p-3 rounded-lg">${booking.subject}</div>
-                        <input type="hidden" name="subject" value="${booking.subject}">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tutor</label>
-                        <div class="bg-gray-100 p-3 rounded-lg">${booking.tutor}</div>
-                        <input type="hidden" name="tutor" value="${booking.tutor}">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                        <div class="bg-gray-100 p-3 rounded-lg">${booking.date}</div>
-                        <input type="hidden" name="date" value="${booking.date}">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                        <div class="bg-gray-100 p-3 rounded-lg">${booking.time}</div>
-                        <input type="hidden" name="time" value="${booking.time}">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Why do you want to cancel this session?</label>
-                        <textarea name="reason" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-32" placeholder="Enter your reason here" required></textarea>
-                    </div>
-
+                    <input type="hidden" name="_csrf" value="${csrfToken}">
                     <input type="hidden" name="id" value="${booking.bookingId}">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Cancellation</label>
+                        <textarea name="reason" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" required></textarea>
+                    </div>
 
                     <div class="flex space-x-4">
                         <button type="submit" class="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600">
-                            <i class="fas fa-times mr-2"></i>Confirm Cancellation
+                            <i class="fas fa-trash mr-2"></i>Confirm Cancellation
                         </button>
                         <a href="view-bookings" class="flex-1 bg-gray-500 text-white py-3 rounded-lg hover:bg-gray-600 text-center">
-                            <i class="fas fa-arrow-left mr-2"></i>Go Back
+                            <i class="fas fa-arrow-left mr-2"></i>Back
                         </a>
                     </div>
                 </form>
@@ -112,5 +102,10 @@
         <p>© 2025 Zentutor.lk. All rights reserved.</p>
     </div>
 </footer>
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+    }
+</script>
 </body>
 </html>

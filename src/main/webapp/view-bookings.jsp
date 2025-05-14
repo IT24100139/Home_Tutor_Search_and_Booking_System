@@ -16,7 +16,7 @@
 <body class="bg-gray-100">
 <div class="flex">
     <!-- Side Navigation -->
-    <aside class="fixed h-screen bg-blue-50 w-64 shadow-lg z-50">
+    <aside class="fixed h-screen bg-blue-50 w-64 shadow-lg z-50 md:block hidden" id="sidebar">
         <div class="flex items-center justify-center px-4 py-6">
             <div class="flex items-center justify-start w-full">
                 <img src="favicon.jpeg" alt="Logo" class="h-10 w-10 mr-3 rounded-lg">
@@ -38,8 +38,11 @@
             </a>
         </nav>
     </aside>
-    <main class="ml-64 flex-1">
-        <header class="fixed w-[calc(100%-16rem)] bg-white shadow-sm py-4 px-6 flex justify-end items-center z-40">
+    <button class="md:hidden p-4 bg-blue-500 text-white fixed top-0 left-0 z-50" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    <main class="md:ml-64 flex-1">
+        <header class="fixed w-full md:w-[calc(100%-16rem)] bg-white shadow-sm py-4 px-6 flex justify-end items-center z-40">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-3">
                     <img src="user.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
@@ -54,7 +57,6 @@
             </div>
         </header>
         <div class="pt-20 px-6 mt-5">
-            <!-- Status Message Display -->
             <c:if test="${not empty success}">
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                         ${success}
@@ -71,14 +73,12 @@
                 </div>
             </c:if>
 
-            <!-- New Booking Button -->
             <div class="mb-6">
                 <a href="book-tutor.jsp" class="block w-full bg-blue-500 text-white text-center py-3 rounded-lg hover:bg-blue-600">
                     <i class="fas fa-plus mr-2"></i>New Booking
                 </a>
             </div>
 
-            <!-- Upcoming Sessions -->
             <h2 class="text-2xl font-bold text-blue-900 mb-6">Upcoming Sessions</h2>
             <div class="space-y-4">
                 <c:forEach items="${upcomingBookings}" var="booking">
@@ -128,7 +128,6 @@
                 </c:forEach>
             </div>
 
-            <!-- Completed Sessions -->
             <div class="mt-8">
                 <h2 class="text-2xl font-bold text-blue-900 mb-6">Completed Sessions</h2>
                 <div class="bg-white p-6 rounded-lg shadow">
@@ -155,5 +154,10 @@
         <p>© 2025 Zentutor.lk. All rights reserved.</p>
     </div>
 </footer>
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+    }
+</script>
 </body>
 </html>
