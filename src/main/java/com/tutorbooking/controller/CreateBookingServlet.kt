@@ -52,14 +52,20 @@ class CreateBookingServlet : HttpServlet() {
                 throw IllegalArgumentException("All fields are required")
             }
 
-            val validSubjects = listOf("Advanced Calculus Session", "Chemistry Lab Practice", "Basic Algebra Review")
+            val validSubjects = listOf("Combined Maths", "Biology", "Physics", "Chemistry")
             if (subject !in validSubjects) {
                 throw IllegalArgumentException("Invalid subject selected")
             }
 
-            val validTutors = listOf("Dr. Sarah Wilson", "Prof. Kelum Senanayaka", "Dr. Amith Pussalla")
+            val tutorMap = mapOf(
+                "Combined Maths" to listOf("Dr. Sarah Wilson", "Prof. Kelum Senanayaka"),
+                "Biology" to listOf("Dr. Amith Pussalla", "Dr. Nimali Perera"),
+                "Physics" to listOf("Prof. Ravi Fernando", "Dr. Lakmal Wijesinghe"),
+                "Chemistry" to listOf("Dr. Priya Mendis", "Prof. Anura Jayasinghe")
+            )
+            val validTutors = tutorMap[subject] ?: throw IllegalArgumentException("No tutors available for subject")
             if (tutor !in validTutors) {
-                throw IllegalArgumentException("Invalid tutor selected")
+                throw IllegalArgumentException("Invalid tutor selected for the subject")
             }
 
             val datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}")
