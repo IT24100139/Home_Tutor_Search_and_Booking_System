@@ -1,3 +1,3 @@
-BK001,Advanced Calculus Session,Dr. Sarah Wilson,2025-05-20,14:30,1.5 Hours,Regular,Confirmed,
-BK002,Chemistry Lab Practice,Prof. Kelum Senanayaka,2025-05-21,10:00,1.5 Hours,Regular,Pending Confirmation,
-BK003,Basic Algebra Review,Dr. Amith Pussalla,2025-05-15,09:00,1.5 Hours,Regular,Confirmed,
+BK001,Combined Maths,Dr. Sarah Wilson,2025-05-20,14:30,1.5 Hours,Regular,Confirmed,
+BK002,Biology,Dr. Amith Pussalla,2025-05-21,10:00,1.5 Hours,Regular,Pending Confirmation,
+BK003,Physics,Prof. Ravi Fernando,2025-05-15,09:00,1.5 Hours,Regular,Confirmed,
