@@ -70,11 +70,12 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                        <select name="subject" id="subject" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <select name="subject" id="subject" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required onchange="updateTutors()">
                             <option value="">Choose Subject</option>
-                            <option value="Advanced Calculus Session">Advanced Calculus Session</option>
-                            <option value="Chemistry Lab Practice">Chemistry Lab Practice</option>
-                            <option value="Basic Algebra Review">Basic Algebra Review</option>
+                            <option value="Combined Maths">Combined Maths</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
                         </select>
                     </div>
 
@@ -82,9 +83,6 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tutor</label>
                         <select name="tutor" id="tutor" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                             <option value="">Choose Tutor</option>
-                            <option value="Dr. Sarah Wilson">Dr. Sarah Wilson</option>
-                            <option value="Prof. Kelum Senanayaka">Prof. Kelum Senanayaka</option>
-                            <option value="Dr. Amith Pussalla">Dr. Amith Pussalla</option>
                         </select>
                     </div>
 
@@ -130,6 +128,28 @@
                 </form>
 
                 <script>
+                    const tutorMap = {
+                        "Combined Maths": ["Dr. Sarah Wilson", "Prof. Kelum Senanayaka"],
+                        "Biology": ["Dr. Amith Pussalla", "Dr. Nimali Perera"],
+                        "Physics": ["Prof. Ravi Fernando", "Dr. Lakmal Wijesinghe"],
+                        "Chemistry": ["Dr. Priya Mendis", "Prof. Anura Jayasinghe"]
+                    };
+
+                    function updateTutors() {
+                        const subject = document.getElementById("subject").value;
+                        const tutorSelect = document.getElementById("tutor");
+                        tutorSelect.innerHTML = '<option value="">Choose Tutor</option>';
+
+                        if (subject && tutorMap[subject]) {
+                            tutorMap[subject].forEach(tutor => {
+                                const option = document.createElement("option");
+                                option.value = tutor;
+                                option.text = tutor;
+                                tutorSelect.appendChild(option);
+                            });
+                        }
+                    }
+
                     function validateForm() {
                         const date = document.getElementById('date').value;
                         const time = document.getElementById('time').value;

@@ -71,19 +71,13 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                        <select name="subject" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <option value="Advanced Calculus Session" ${booking.subject == 'Advanced Calculus Session' ? 'selected' : ''}>Advanced Calculus Session</option>
-                            <option value="Chemistry Lab Practice" ${booking.subject == 'Chemistry Lab Practice' ? 'selected' : ''}>Chemistry Lab Practice</option>
-                            <option value="Basic Algebra Review" ${booking.subject == 'Basic Algebra Review' ? 'selected' : ''}>Basic Algebra Review</option>
-                        </select>
+                        <input type="text" name="subject" value="${booking.subject}" class="w-full px-4 py-3 border rounded-lg bg-gray-100" readonly>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tutor</label>
-                        <select name="tutor" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <option value="Dr. Sarah Wilson" ${booking.tutor == 'Dr. Sarah Wilson' ? 'selected' : ''}>Dr. Sarah Wilson</option>
-                            <option value="Prof. Kelum Senanayaka" ${booking.tutor == 'Prof. Kelum Senanayaka' ? 'selected' : ''}>Prof. Kelum Senanayaka</option>
-                            <option value="Dr. Amith Pussalla" ${booking.tutor == 'Dr. Amith Pussalla' ? 'selected' : ''}>Dr. Amith Pussalla</option>
+                        <select name="tutor" id="tutor" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Choose Tutor</option>
                         </select>
                     </div>
 
@@ -126,6 +120,31 @@
                     </div>
                 </form>
                 <script>
+                    const tutorMap = {
+                        "Combined Maths": ["Dr. Sarah Wilson", "Prof. Kelum Senanayaka"],
+                        "Biology": ["Dr. Amith Pussalla", "Dr. Nimali Perera"],
+                        "Physics": ["Prof. Ravi Fernando", "Dr. Lakmal Wijesinghe"],
+                        "Chemistry": ["Dr. Priya Mendis", "Prof. Anura Jayasinghe"]
+                    };
+
+                    window.onload = function() {
+                        const subject = "${booking.subject}";
+                        const tutorSelect = document.getElementById("tutor");
+                        tutorSelect.innerHTML = '<option value="">Choose Tutor</option>';
+
+                        if (subject && tutorMap[subject]) {
+                            tutorMap[subject].forEach(tutor => {
+                                const option = document.createElement("option");
+                                option.value = tutor;
+                                option.text = tutor;
+                                if (tutor === "${booking.tutor}") {
+                                    option.selected = true;
+                                }
+                                tutorSelect.appendChild(option);
+                            });
+                        }
+                    };
+
                     function validateForm() {
                         const date = document.querySelector('input[name="date"]').value;
                         const time = document.querySelector('input[name="time"]').value;
