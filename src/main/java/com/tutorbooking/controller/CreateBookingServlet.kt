@@ -9,133 +9,171 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import java.io.IOException
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
+import java.util.*
 import java.util.regex.Pattern
 
 @WebServlet("/create-booking")
 class CreateBookingServlet : HttpServlet() {
-    private lateinit var bookingManager: BookingManager
 
+    private var bookingManager: BookingManager? = null
+
+    // Initialize BookingManager when servlet is loaded
     override fun init() {
         super.init()
         bookingManager = BookingManager(servletContext)
     }
 
+    // GET method: Displays the booking form with CSRF protection
     @Throws(ServletException::class, IOException::class)
     override fun doGet(request: HttpServletRequest, response: HttpServletResponse) {
-        val csrfToken = UUID.randomUUID().toString()
-        request.session.setAttribute("csrfToken", csrfToken)
-        request.setAttribute("csrfToken", csrfToken)
-        request.getRequestDispatcher("book-tutor.jsp").forward(request, response)
+        try {
+            val session = request.getSession(true)
+            session.maxInactiveInterval = 30 * 60 // 30 min session timeout
+
+            // Generate CSRF token
+            val csrfToken = UUID.randomUUID().toString()
+            session.setAttribute("csrfToken", csrfToken)
+
+            // Debug logging (can be removed in production)
+            println("Session ID (doGet) = ${session.id}")
+            println("Generated CSRF Token = $csrfToken")
+
+            // Prevent caching the booking form
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+            response.setHeader("Pragma", "no-cache")
+            response.setDateHeader("Expires", 0)
+
+            // Pass CSRF token to form
+            request.setAttribute("csrfToken", csrfToken)
+            request.getRequestDispatcher("book-tutor.jsp").forward(request, response)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            response.sendRedirect("view-bookings?error=Unable to load booking form.")
+        }
     }
 
+    // POST method: Handles booking form submission
     @Throws(ServletException::class, IOException::class)
     override fun doPost(request: HttpServletRequest, response: HttpServletResponse) {
         try {
-            val submittedToken = request.getParameter("_csrf")
-            val sessionToken = request.session.getAttribute("csrfToken") as? String
-            if (submittedToken != sessionToken) {
-                throw IllegalArgumentException("Invalid CSRF token")
+            // Validate session existence
+            val session = request.getSession(false)
+                ?: throw SessionException("Session expired. Please refresh.")
+
+            println("Session ID (doPost) = ${session.id}")
+
+            // Validate CSRF token
+            val token = request.getParameter("_csrf")
+            val sessionToken = session.getAttribute("csrfToken") as? String
+                ?: throw SessionException("Missing CSRF token in session.")
+            if (token == null || token != sessionToken) {
+                throw SessionException("Invalid CSRF token.")
             }
 
-            val subject = request.getParameter("subject")?.trim()
-            val tutor = request.getParameter("tutor")?.trim()
-            val date = request.getParameter("date")?.trim()
-            val time = request.getParameter("time")?.trim()
-            val duration = request.getParameter("duration")?.trim()
-            val sessionType = request.getParameter("sessionType")?.trim()
+            // Remove token after use
+            session.removeAttribute("csrfToken")
 
-            if (subject.isNullOrEmpty() || tutor.isNullOrEmpty() || date.isNullOrEmpty() ||
-                time.isNullOrEmpty() || duration.isNullOrEmpty() || sessionType.isNullOrEmpty()) {
-                throw IllegalArgumentException("All fields are required")
-            }
+            // Validate form fields and create booking object
+            val booking = validateAndCreateBooking(request)
 
-            val validSubjects = listOf("Combined Maths", "Biology", "Physics", "Chemistry")
-            if (subject !in validSubjects) {
-                throw IllegalArgumentException("Invalid subject selected")
-            }
+            // Persist booking
+            bookingManager?.createBooking(booking)
 
-            val tutorMap = mapOf(
-                "Combined Maths" to listOf("Dr. Sarah Wilson", "Prof. Kelum Senanayaka"),
-                "Biology" to listOf("Dr. Amith Pussalla", "Dr. Nimali Perera"),
-                "Physics" to listOf("Prof. Ravi Fernando", "Dr. Lakmal Wijesinghe"),
-                "Chemistry" to listOf("Dr. Priya Mendis", "Prof. Anura Jayasinghe")
-            )
-            val validTutors = tutorMap[subject] ?: throw IllegalArgumentException("No tutors available for subject")
-            if (tutor !in validTutors) {
-                throw IllegalArgumentException("Invalid tutor selected for the subject")
-            }
-
-            val datePattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}")
-            if (!datePattern.matcher(date).matches()) {
-                throw IllegalArgumentException("Invalid date format. Use yyyy-MM-dd")
-            }
-            val bookingDate = LocalDate.parse(date)
-            if (bookingDate.isBefore(LocalDate.now())) {
-                throw IllegalArgumentException("Booking date cannot be in the past")
-            }
-
-            val timePattern = Pattern.compile("\\d{2}:\\d{2}")
-            if (!timePattern.matcher(time).matches()) {
-                throw IllegalArgumentException("Invalid time format. Use HH:mm")
-            }
-
-            val validDurations = listOf("30 Minutes", "1 Hour", "1.5 Hours", "2 Hours")
-            if (duration !in validDurations) {
-                throw IllegalArgumentException("Invalid duration")
-            }
-
-            val validSessionTypes = listOf("Trial", "Regular", "Premium")
-            if (sessionType !in validSessionTypes) {
-                throw IllegalArgumentException("Invalid session type")
-            }
-
-            if (!checkAvailability(tutor, date, time, duration)) {
-                throw IllegalArgumentException("Tutor is unavailable at the selected time")
-            }
-
-            val booking = Booking()
-            booking.bookingId = generateBookingId()
-            booking.subject = subject
-            booking.setTutor(tutor)
-            booking.setDate(date)
-            booking.setTime(time)
-            booking.setDuration(duration)
-            booking.setSessionType(sessionType)
-            booking.setStatus("Confirmed")
-
-            bookingManager.createBooking(booking)
+            // Redirect to success page
             response.sendRedirect("view-bookings?status=created")
+
+        } catch (e: SessionException) {
+            e.printStackTrace()
+            handleError(request, response, e.message)
         } catch (e: IllegalArgumentException) {
-            request.setAttribute("error", e.message)
-            request.getRequestDispatcher("book-tutor.jsp").forward(request, response)
-        } catch (e: IOException) {
-            System.err.println("IO Error creating booking: ${e.message}")
-            request.setAttribute("error", "Failed to create booking: Invalid data in bookings file. Please contact support.")
-            request.getRequestDispatcher("book-tutor.jsp").forward(request, response)
+            e.printStackTrace()
+            handleError(request, response, e.message)
         } catch (e: Exception) {
-            System.err.println("Unexpected error creating booking: ${e.message}")
-            request.setAttribute("error", "Failed to create booking: ${e.message}")
-            request.getRequestDispatcher("book-tutor.jsp").forward(request, response)
+            e.printStackTrace()
+            handleError(request, response, "A system error occurred. Try again.")
         }
     }
 
-    @Throws(IOException::class)
-    private fun generateBookingId(): String {
-        try {
-            val bookings: List<Booking> = bookingManager.getAllBookings()
-            return "BK" + String.format("%03d", bookings.size + 1)
-        } catch (e: IOException) {
-            throw IOException("Failed to generate booking ID: ${e.message}", e)
+    // Validates all input fields and constructs a Booking object
+    private fun validateAndCreateBooking(req: HttpServletRequest): Booking {
+        val subject = required(req.getParameter("subject"), "Subject is required")
+        val tutor = required(req.getParameter("tutor"), "Tutor is required")
+        val date = required(req.getParameter("date"), "Date is required")
+        val time = required(req.getParameter("time"), "Time is required")
+        val duration = required(req.getParameter("duration"), "Duration is required")
+        val sessionType = required(req.getParameter("sessionType"), "Session type is required")
+
+        // Validate allowed subjects
+        val validSubjects = listOf("Combined Maths", "Biology", "Physics", "Chemistry")
+        require(validSubjects.contains(subject)) { "Invalid subject" }
+
+        // Tutor list validation per subject
+        val tutorMap = mapOf(
+            "Combined Maths" to listOf("Dr. Sarah Wilson", "Prof. Kelum Senanayaka"),
+            "Biology" to listOf("Dr. Amith Pussalla", "Dr. Nimali Perera"),
+            "Physics" to listOf("Prof. Ravi Fernando", "Dr. Lakmal Wijesinghe"),
+            "Chemistry" to listOf("Dr. Priya Mendis", "Prof. Anura Jayasinghe")
+        )
+        require(tutorMap[subject]?.contains(tutor) == true) { "Tutor not available for selected subject" }
+
+        validateDate(date)
+        validateTime(time)
+        validateDurationSessionType(duration, sessionType)
+
+        // Check if the tutor is free
+        require(checkAvailability(tutor, date, time, duration, null)) {
+            "Tutor is not available at the selected time"
+        }
+
+        return Booking(generateBookingId(), subject, tutor, date, time, duration, sessionType, "Pending Confirmation")
+    }
+
+    // Generic error forwarding method
+    private fun handleError(req: HttpServletRequest, res: HttpServletResponse, msg: String?) {
+        val csrfToken = UUID.randomUUID().toString()
+        req.session.setAttribute("csrfToken", csrfToken)
+        req.setAttribute("csrfToken", csrfToken)
+        req.setAttribute("error", msg)
+        req.getRequestDispatcher("book-tutor.jsp").forward(req, res)
+    }
+
+    // Required field validator
+    private fun required(value: String?, msg: String): String {
+        require(!(value == null || value.trim().isEmpty())) { msg }
+        return value.trim()
+    }
+
+    // Date format and logic validation
+    private fun validateDate(date: String) {
+        require(Pattern.matches("\\d{4}-\\d{2}-\\d{2}", date)) { "Invalid date format (yyyy-MM-dd)" }
+        require(!LocalDate.parse(date).isBefore(LocalDate.now())) { "Date cannot be in the past" }
+    }
+
+    // Time format validation
+    private fun validateTime(time: String) {
+        require(Pattern.matches("\\d{2}:\\d{2}", time)) { "Invalid time format (HH:mm)" }
+    }
+
+    // Duration must match appropriate session type
+    private fun validateDurationSessionType(duration: String, type: String) {
+        when (duration) {
+            "30 Minutes" -> require(type == "Trial") { "30 min must be Trial" }
+            "1 Hour", "1.5 Hours" -> require(type == "Regular") { "1–1.5h must be Regular" }
+            "2 Hours" -> require(type == "Premium") { "2h must be Premium" }
+            else -> throw IllegalArgumentException("Invalid duration")
         }
     }
 
-    private fun checkAvailability(tutor: String, date: String, time: String, duration: String, excludeId: String? = null): Boolean {
-        val bookings = bookingManager.getAllBookings()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val startTime = LocalDateTime.parse("$date $time", formatter)
+    // Checks if there's a clash with existing bookings
+    private fun checkAvailability(
+        tutor: String,
+        date: String,
+        time: String,
+        duration: String,
+        excludeId: String?
+    ): Boolean {
+        val bookings = bookingManager!!.allBookings
         val durationMinutes = when (duration) {
             "30 Minutes" -> 30
             "1 Hour" -> 60
@@ -143,21 +181,41 @@ class CreateBookingServlet : HttpServlet() {
             "2 Hours" -> 120
             else -> 0
         }
-        val endTime = startTime.plusMinutes(durationMinutes.toLong())
 
-        return bookings.none { b ->
-            if (excludeId != null && b.bookingId == excludeId) return@none false
-            b.tutor == tutor && b.date == date &&
-                    LocalDateTime.parse("${b.date} ${b.time}", formatter).let { bStart ->
-                        val bEnd = bStart.plusMinutes(when (b.duration) {
-                            "30 Minutes" -> 30
-                            "1 Hour" -> 60
-                            "1.5 Hours" -> 90
-                            "2 Hours" -> 120
-                            else -> 0
-                        }.toLong())
-                        bStart < endTime && bEnd > startTime
-                    }
+        val (h, m) = time.split(":").map { it.toInt() }
+        val newStart = LocalDate.parse(date).atTime(h, m)
+        val newEnd = newStart.plusMinutes(durationMinutes.toLong())
+
+        for (b in bookings) {
+            if (excludeId != null && b.bookingId == excludeId) continue
+            if (b.tutor != tutor || b.date != date) continue
+
+            val (bh, bm) = b.time.split(":").map { it.toInt() }
+            val start = LocalDate.parse(b.date).atTime(bh, bm)
+            val end = start.plusMinutes(
+                when (b.duration) {
+                    "30 Minutes" -> 30
+                    "1 Hour" -> 60
+                    "1.5 Hours" -> 90
+                    "2 Hours" -> 120
+                    else -> 0
+                }.toLong()
+            )
+
+            // Check time overlap
+            if (start.isBefore(newEnd) && end.isAfter(newStart)) {
+                return false
+            }
         }
+        return true
     }
+
+    // Generate unique booking ID like BK001, BK002...
+    private fun generateBookingId(): String {
+        val count = bookingManager!!.allBookings.size + 1
+        return String.format("BK%03d", count)
+    }
+
+    // Custom exception for session-related errors
+    private class SessionException(message: String?) : Exception(message)
 }
