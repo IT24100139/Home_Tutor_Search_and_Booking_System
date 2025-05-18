@@ -27,7 +27,7 @@ public class EditRecordServlet extends HttpServlet {
                 .findFirst()
                 .orElse(null);
         request.setAttribute("record", record);
-        request.getRequestDispatcher("edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/admin/edit.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
