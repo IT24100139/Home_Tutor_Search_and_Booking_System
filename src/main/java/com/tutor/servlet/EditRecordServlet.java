@@ -15,7 +15,7 @@ public class EditRecordServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        String filePath = getServletContext().getRealPath("/records.txt");
+        String filePath = "F:\\sliit\\1st year\\2 sem\\Object Oriented Programming - SE1020\\project\\sample\\HTB_Admin\\src\\main\\webapp\\records.txt";
         this.dataStorage = new DataStorage(filePath);
     }
 
