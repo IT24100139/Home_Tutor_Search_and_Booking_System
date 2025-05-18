@@ -62,7 +62,7 @@
 
                 <!-- Booking Form -->
                 <form action="create-booking" method="post" class="space-y-6">
-                    <!-- ✅ CSRF token included from servlet -->
+                    <!-- CSRF token included from servlet -->
                     <input type="hidden" name="_csrf" value="${csrfToken}" />
 
                     <!-- Subject Dropdown -->
