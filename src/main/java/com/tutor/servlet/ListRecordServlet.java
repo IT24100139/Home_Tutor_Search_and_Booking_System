@@ -17,16 +17,20 @@ public class ListRecordServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        String filePath = "F:\\sliit\\1st year\\2 sem\\Object Oriented Programming - SE1020\\project\\sample\\HTB_Admin\\src\\main\\webapp\\records.txt";
+        String filePath = "F:\\sliit\\1st year\\2 sem\\Object Oriented Programming - SE1020\\project\\Final real project\\HTBT-Admin CRUD\\src\\main\\webapp\\records.txt";
         this.dataStorage = new DataStorage(filePath);
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         if (request.getSession().getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        Admin user = (Admin) request.getSession().getAttribute("user");
+        request.setAttribute("currentUserRole", user != null ? user.getRole() : null);
 
         List<Admin> records = dataStorage.getAllRecords();
 
@@ -40,6 +44,6 @@ public class ListRecordServlet extends HttpServlet {
         }
 
         request.setAttribute("records", records);
-        request.getRequestDispatcher("/views/admin/list.jsp").forward(request, response);
+        request.getRequestDispatcher("list.jsp").forward(request, response);
     }
 }
