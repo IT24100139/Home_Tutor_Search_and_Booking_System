@@ -1,6 +1,8 @@
 package com.tutor.util;
 
 import com.tutor.model.Admin;
+import com.tutor.model.AdminUser;
+import com.tutor.model.EditorUser;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +37,22 @@ public class DataStorage {
                 String[] parts = line.split(DELIMITER);
                 if (parts.length >= 4) {
                     String role = parts.length >= 5 ? parts[4] : "Admin";
-                    records.add(new Admin(
-                            Integer.parseInt(parts[0]),
-                            parts[1],
-                            parts[2],
-                            parts[3],
-                            role
-                    ));
+                    if ("Editor".equals(role)) {
+                        records.add(new EditorUser(
+                                Integer.parseInt(parts[0]),
+                                parts[1],
+                                parts[2],
+                                parts[3]
+                        ));
+                    } else {
+                        records.add(new AdminUser(
+                                Integer.parseInt(parts[0]),
+                                parts[1],
+                                parts[2],
+                                parts[3],
+                                role
+                        ));
+                    }
                 }
             }
         } catch (IOException e) {
@@ -63,9 +74,21 @@ public class DataStorage {
 
     public synchronized void updateRecordRole(int id, String newRole) throws IOException {
         List<Admin> records = getAllRecords();
-        for (Admin record : records) {
+        for (int i = 0; i < records.size(); i++) {
+            Admin record = records.get(i);
             if (record.getId() == id) {
-                record.setRole(newRole);
+                if (record instanceof EditorUser && "Admin".equals(newRole)) {
+                    // Replace Editor with new Admin instance
+                    records.set(i, new AdminUser(
+                            record.getId(),
+                            record.getName(),
+                            record.getEmail(),
+                            record.getPassword(),
+                            newRole
+                    ));
+                } else {
+                    record.setRole(newRole);
+                }
                 break;
             }
         }
