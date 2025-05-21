@@ -1,70 +1,32 @@
 package com.tutorbooking.model;
 
-//Booking class extends Session to represent a full tutoring session with extra metadata.
 public class Booking extends Session {
-
-    // Booking metadata
     private String bookingId;
     private String subject;
     private String tutor;
-    private String sessionType; // Trial, Regular, or Premium
-    private String status; // e.g., Confirmed, Cancelled, Completed
-    private String cancellationReason; // optional if cancelled
+    private String sessionType;
+    private String status;
+    private String cancellationReason;
 
-    //Enum to define session types and their costs.
-    public enum SessionType {
-        TRIAL(30) {
-            @Override
-            public double calculateCost() {
-                return 0.0; // Trial is free
-            }
-        },
-        REGULAR(60) {
-            @Override
-            public double calculateCost() {
-                return 1000.0; // Regular session cost
-            }
-        },
-        PREMIUM(90) {
-            @Override
-            public double calculateCost() {
-                return 2000.0; // Premium session cost
-            }
-        };
+    public static final String TRIAL = "TRIAL";
+    public static final String REGULAR = "REGULAR";
+    public static final String PREMIUM = "PREMIUM";
 
-        private final int baseMinutes;
-
-        // Constructor for each enum value
-        SessionType(int minutes) {
-            this.baseMinutes = minutes;
-        }
-
-        public int getBaseDuration() {
-            return baseMinutes;
-        }
-
-        // Each session type defines how to calculate its cost
-        public abstract double calculateCost();
-    }
-
-    // Default constructor (used for initialization without values)
     public Booking() {
     }
 
-    // Constructor with full parameters
     public Booking(String bookingId, String subject, String tutor, String date,
                    String time, String duration, String sessionType, String status) {
         this.bookingId = bookingId;
         this.subject = subject;
         this.tutor = tutor;
-        setDate(date);         // inherited from Session
-        setTime(time);         // inherited from Session
-        setDuration(duration); // inherited from Session
+        setDate(date);
+        setTime(time);
+        setDuration(duration);
         setSessionType(sessionType);
         this.status = status;
     }
 
-    // Getters and setters
     public String getBookingId() {
         return bookingId;
     }
@@ -93,28 +55,31 @@ public class Booking extends Session {
         return sessionType;
     }
 
-    //Validates and sets the session type.
-    //Throws an error if session type is missing or invalid.
     public void setSessionType(String sessionType) {
         if (sessionType == null || sessionType.trim().isEmpty()) {
             throw new IllegalArgumentException("Session type is required");
         }
-        try {
-            // Ensure the type matches one of the enum values
-            this.sessionType = SessionType.valueOf(sessionType.toUpperCase()).name();
-        } catch (IllegalArgumentException e) {
+
+        String type = sessionType.trim().toUpperCase();
+
+        if (!type.equals(TRIAL) && !type.equals(REGULAR) && !type.equals(PREMIUM)) {
             throw new IllegalArgumentException("Invalid session type: " + sessionType);
         }
+
+        this.sessionType = type;
     }
 
-    //Calculates the session cost using the enum definition.
     @Override
     public double getCost() {
         if (sessionType == null) return 0.0;
-        try {
-            return SessionType.valueOf(sessionType).calculateCost();
-        } catch (IllegalArgumentException e) {
-            return 0.0;
+
+        switch (sessionType) {
+            case REGULAR:
+                return 1000.0;
+            case PREMIUM:
+                return 2000.0;
+            default:
+                return 0.0;
         }
     }
 
@@ -134,5 +99,6 @@ public class Booking extends Session {
         this.cancellationReason = cancellationReason;
     }
 }
+
 
 
