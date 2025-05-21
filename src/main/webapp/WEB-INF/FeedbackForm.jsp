@@ -123,7 +123,7 @@
     <div class="button-container">
       <a href="${pageContext.request.contextPath}/" class="btn btn-cancel">Cancel</a>
       <button type="submit" class="btn btn-submit">Submit Feedback</button>
-   
+    </div>
   </form>
 </div>
 </body>
