@@ -1,6 +1,6 @@
 package com.tutor.servlet;
 
-import com.tutor.model.Record;
+import com.tutor.model.Admin;
 import com.tutor.util.DataStorage;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,7 +28,7 @@ public class ListRecordServlet extends HttpServlet {
             return;
         }
 
-        List<Record> records = dataStorage.getAllRecords();
+        List<Admin> records = dataStorage.getAllRecords();
 
         // Search filter only
         String searchTerm = request.getParameter("search");

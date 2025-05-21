@@ -1,6 +1,6 @@
 package com.tutor.util;
 
-import com.tutor.model.Record;
+import com.tutor.model.Admin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +27,15 @@ public class DataStorage {
         }
     }
 
-    public synchronized List<Record> getAllRecords() {
-        List<Record> records = new ArrayList<>();
+    public synchronized List<Admin> getAllRecords() {
+        List<Admin> records = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(DELIMITER);
                 if (parts.length >= 4) {
                     String role = parts.length >= 5 ? parts[4] : "Admin";
-                    records.add(new Record(
+                    records.add(new Admin(
                             Integer.parseInt(parts[0]),
                             parts[1],
                             parts[2],
@@ -50,7 +50,7 @@ public class DataStorage {
         return records;
     }
 
-    public synchronized void addRecord(Record record) throws IOException {
+    public synchronized void addRecord(Admin record) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
             writer.write(record.getId() + SEPARATOR
                     + record.getName() + SEPARATOR
@@ -62,8 +62,8 @@ public class DataStorage {
     }
 
     public synchronized void updateRecordRole(int id, String newRole) throws IOException {
-        List<Record> records = getAllRecords();
-        for (Record record : records) {
+        List<Admin> records = getAllRecords();
+        for (Admin record : records) {
             if (record.getId() == id) {
                 record.setRole(newRole);
                 break;
@@ -72,9 +72,9 @@ public class DataStorage {
         saveAllRecords(records);
     }
 
-    private void saveAllRecords(List<Record> records) throws IOException {
+    private void saveAllRecords(List<Admin> records) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (Record r : records) {
+            for (Admin r : records) {
                 writer.write(r.getId() + SEPARATOR
                         + r.getName() + SEPARATOR
                         + r.getEmail() + SEPARATOR
@@ -86,14 +86,14 @@ public class DataStorage {
     }
 
     public synchronized void deleteRecord(int id) throws IOException {
-        List<Record> updated = getAllRecords().stream()
+        List<Admin> updated = getAllRecords().stream()
                 .filter(r -> r.getId() != id)
                 .collect(Collectors.toList());
         saveAllRecords(updated);
     }
 
     public synchronized int generateNewId() {
-        List<Record> records = getAllRecords();
+        List<Admin> records = getAllRecords();
         return records.isEmpty() ? 1 : records.get(records.size() - 1).getId() + 1;
     }
 }

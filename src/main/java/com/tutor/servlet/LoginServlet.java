@@ -1,6 +1,6 @@
 package com.tutor.servlet;
 
-import com.tutor.model.Record;
+import com.tutor.model.Admin;
 import com.tutor.util.DataStorage;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,9 +30,9 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        List<Record> records = dataStorage.getAllRecords();
+        List<Admin> records = dataStorage.getAllRecords();
 
-        for (Record record : records) {
+        for (Admin record : records) {
             if (record.getEmail().equals(email) && record.getPassword().equals(password)) {
                 request.getSession().setAttribute("user", record);
                 response.sendRedirect(request.getContextPath() + "/");

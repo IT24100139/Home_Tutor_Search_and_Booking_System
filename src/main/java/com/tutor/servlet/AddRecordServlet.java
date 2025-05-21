@@ -1,6 +1,6 @@
 package com.tutor.servlet;
 
-import com.tutor.model.Record;
+import com.tutor.model.Admin;
 import com.tutor.util.DataStorage;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,7 +26,7 @@ public class AddRecordServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Record newAdmin = new Record(
+        Admin newAdmin = new Admin(
                 dataStorage.generateNewId(),
                 request.getParameter("name"),
                 request.getParameter("email"),

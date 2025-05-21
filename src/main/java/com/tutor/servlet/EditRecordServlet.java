@@ -1,6 +1,6 @@
 package com.tutor.servlet;
 
-import com.tutor.model.Record;
+import com.tutor.model.Admin;
 import com.tutor.util.DataStorage;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,7 +22,7 @@ public class EditRecordServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        Record record = dataStorage.getAllRecords().stream()
+        Admin record = dataStorage.getAllRecords().stream()
                 .filter(r -> r.getId() == id)
                 .findFirst()
                 .orElse(null);
