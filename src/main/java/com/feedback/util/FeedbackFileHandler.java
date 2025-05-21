@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FeedbackFileHandler {
     // Use user home directory to store data for better reliability
-    private static final String FILE_PATH = System.getProperty("user.home") + File.separator + "feedbackData.dat";
+    private static final String FILE_PATH = System.getProperty("user.home") + File.separator + "feedbackData.txt";
 
     public static synchronized void saveFeedbacks(List<Feedback> feedbacks) {
         try {
