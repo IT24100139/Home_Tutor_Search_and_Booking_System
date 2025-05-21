@@ -3,15 +3,8 @@ package com.tutorbooking.service;
 import com.tutorbooking.model.Booking;
 import jakarta.servlet.ServletContext;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,14 +17,13 @@ public class BookingManager {
         this.servletContext = context;
     }
 
-    public BookingManager() {
-    }
-
     private String getFilePath() {
         if (servletContext == null) {
-            throw new IllegalStateException("ServletContext not initialized. Use constructor with ServletContext.");
+            throw new IllegalStateException("ServletContext not initialized.");
         }
-        return servletContext.getRealPath("/WEB-INF/" + FILE_NAME);
+        String path = servletContext.getRealPath("/WEB-INF/" + FILE_NAME);
+        System.out.println("Resolved file path: " + path);
+        return path;
     }
 
     public synchronized void createBooking(Booking booking) throws IOException {
@@ -40,11 +32,11 @@ public class BookingManager {
         Path path = Paths.get(getFilePath());
 
         if (!Files.exists(path)) {
+            Files.createDirectories(path.getParent());
             Files.createFile(path);
         }
 
-        Files.write(path, (data + System.lineSeparator()).getBytes(),
-                StandardOpenOption.APPEND);
+        Files.write(path, (data + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
     }
 
     public synchronized List<Booking> getAllBookings() throws IOException {
@@ -59,22 +51,17 @@ public class BookingManager {
             int lineNumber = 0;
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
-                if (line.trim().isEmpty()) {
-                    System.err.println("Skipping empty line at line " + lineNumber);
-                    continue;
-                }
+                if (line.trim().isEmpty()) continue;
+
                 try {
                     Booking booking = convertStringToBooking(line);
-                    if (booking != null) {
-                        bookings.add(booking);
-                    } else {
-                        System.err.println("Skipping invalid booking at line " + lineNumber + ": " + line);
-                    }
+                    if (booking != null) bookings.add(booking);
                 } catch (Exception e) {
-                    throw new IOException("Error parsing booking at line " + lineNumber + ": " + line + " - " + e.getMessage(), e);
+                    System.err.println("Invalid line " + lineNumber + ": " + e.getMessage());
                 }
             }
         }
+
         return bookings;
     }
 
@@ -131,37 +118,34 @@ public class BookingManager {
         );
     }
 
-    private Booking convertStringToBooking(String str) throws IOException {
+    private Booking convertStringToBooking(String str) {
         String[] parts = str.split(DELIMITER, -1);
-        if (parts.length < 8) {
-            System.err.println("Invalid booking line: " + str + " (Expected at least 8 fields, got " + parts.length + ")");
-            return null;
+        if (parts.length < 8) return null;
+
+        Booking booking = new Booking();
+        booking.setBookingId(parts[0]);
+        booking.setSubject(parts[1]);
+        booking.setTutor(parts[2]);
+        booking.setDate(parts[3]);
+        booking.setTime(parts[4]);
+        booking.setDuration(parts[5]);
+        booking.setSessionType(parts[6]);
+        booking.setStatus(parts[7]);
+
+        if (parts.length > 8) {
+            booking.setCancellationReason(parts[8]);
         }
-        try {
-            Booking booking = new Booking();
-            booking.setBookingId(parts[0]);
-            booking.setSubject(parts[1]);
-            booking.setTutor(parts[2]);
-            booking.setDate(parts[3]);
-            booking.setTime(parts[4]);
-            booking.setDuration(parts[5]);
-            booking.setSessionType(parts[6]);
-            booking.setStatus(parts[7]);
-            if (parts.length > 8 && !parts[8].isEmpty()) {
-                booking.setCancellationReason(parts[8]);
-            }
-            return booking;
-        } catch (Exception e) {
-            throw new IOException("Failed to parse booking line: " + str + " - " + e.getMessage(), e);
-        }
+
+        return booking;
     }
 
     private void validateBooking(Booking booking) {
-        if (booking.getBookingId() == null || booking.getSubject() == null ||
-                booking.getTutor() == null || booking.getDate() == null ||
-                booking.getTime() == null || booking.getDuration() == null ||
+        if (booking.getBookingId() == null || booking.getSubject() == null || booking.getTutor() == null ||
+                booking.getDate() == null || booking.getTime() == null || booking.getDuration() == null ||
                 booking.getSessionType() == null) {
             throw new IllegalArgumentException("All booking fields are required");
         }
     }
 }
+
+
