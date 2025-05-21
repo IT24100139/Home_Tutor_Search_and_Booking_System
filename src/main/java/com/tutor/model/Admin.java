@@ -1,6 +1,6 @@
 package com.tutor.model;
 
-public class Admin {
+public abstract class Admin {
     private int id;
     private String name;
     private String email;
@@ -20,5 +20,8 @@ public class Admin {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
