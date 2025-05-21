@@ -27,9 +27,11 @@
       <a href="#dashboard" class="block p-4 text-gray-700 hover:bg-blue-100 nav-link">
         <i class="fas fa-home mr-2"></i> Dashboard
       </a>
-      <a href="#create-admin" class="block p-4 text-gray-700 hover:bg-blue-100 nav-link">
-        <i class="fas fa-user-plus mr-2"></i> Create New Admin
-      </a>
+      <c:if test="${user.role eq 'Admin'}">
+        <a href="#create-admin" class="block p-4 text-gray-700 hover:bg-blue-100 nav-link">
+          <i class="fas fa-user-plus mr-2"></i> Create New Admin
+        </a>
+      </c:if>
       <a href="#manage-users" class="block p-4 text-gray-700 hover:bg-blue-100 nav-link">
         <i class="fas fa-users mr-2"></i> Manage Users
       </a>
@@ -51,17 +53,22 @@
     <header class="fixed w-[calc(100%-16rem)] bg-white shadow-sm py-4 px-6 flex justify-end items-center z-40">
       <div class="flex items-center gap-4">
         <!-- Profile Section -->
-        <div class="flex items-center gap-3">
-          <img src="../admin.jpg" alt="Profile"
-               class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
-          <div>
-            <p class="font-medium">Isuru Udana</p>
-            <span class="text-sm text-gray-500">Admin</span>
+        <c:if test="${not empty user}">
+          <div class="flex items-center gap-3">
+            <img src="../admin.jpg" alt="Profile"
+                 class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
+            <div>
+              <p class="font-medium">${user.name}</p>
+              <span class="text-sm text-gray-500">${user.role}</span>
+            </div>
           </div>
+        </c:if>
+        <div class="flex gap-4">
+          <a href="${pageContext.request.contextPath}/logout"
+             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300">
+            Logout
+          </a>
         </div>
-        <a href="./login.jsp" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 inline-flex items-center">
-          <i class="fas fa-sign-out-alt mr-2"></i>Logout
-        </a>
       </div>
     </header>
 

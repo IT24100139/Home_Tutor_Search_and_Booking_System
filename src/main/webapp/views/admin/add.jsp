@@ -9,6 +9,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 
+
 <div id="create-admin" class="content-section">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Add New Admin</h1>

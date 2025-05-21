@@ -9,7 +9,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%@ include file="./partials/hedder.jsp"%>
-  <title>Admin List</title>
+<title>Admin List</title>
 <%@ include file="./partials/left.jsp"%>
 
 <!-- Dashboard Section -->
@@ -20,15 +20,15 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold mb-2">Total Tutors</h3>
-      <p class="text-3xl font-bold text-blue-500">5</p>
+      <p class="text-3xl font-bold text-blue-500">3</p>
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold mb-2">Total Users</h3>
-      <p class="text-3xl font-bold text-green-500">265</p>
+      <p class="text-3xl font-bold text-green-500">24</p>
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold mb-2">Bookings</h3>
-      <p class="text-3xl font-bold text-purple-500">35</p>
+      <p class="text-3xl font-bold text-purple-500">2</p>
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
       <h3 class="text-lg font-semibold mb-2">Avg. Rating</h3>
@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <!-- New Admin Management Table -->
+  <!-- Admin Management Table -->
   <div class="mb-8">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold">Admin Management</h2>
@@ -61,10 +61,7 @@
       </form>
     </div>
 
-    <!-- <a href="${pageContext.request.contextPath}/add">Add New Admin</a> -->
-
     <div class="bg-white rounded-lg shadow overflow-x-auto">
-
       <table class="w-full">
         <thead class="bg-gray-50">
         <tr>
@@ -72,35 +69,43 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          <c:if test="${user.role eq 'Admin'}">
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </c:if>
         </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <c:forEach items="${records}" var="record">
-            <tr>
-              <td class="px-6 py-4">${record.id}</td>
-              <td class="px-6 py-4">${record.name}</td>
-              <td class="px-6 py-4">${record.email}</td>
-              <td class="px-6 py-4">${record.role}</td>
+        <c:forEach items="${records}" var="record">
+          <tr>
+            <td class="px-6 py-4">${record.id}</td>
+            <td class="px-6 py-4">${record.name}</td>
+            <td class="px-6 py-4">${record.email}</td>
+            <td class="px-6 py-4">${record.role}</td>
+            <c:if test="${user.role eq 'Admin'}">
               <td class="px-6 py-4">
-                <a href="${pageContext.request.contextPath}/edit?id=${record.id}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors mr-1">
+                <a href="${pageContext.request.contextPath}/edit?id=${record.id}"
+                   class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors mr-1">
                   Edit Role
                 </a>
                 <form action="${pageContext.request.contextPath}/delete" method="post" style="display:inline;">
                   <input type="hidden" name="id" value="${record.id}">
-                  <button
-                          class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors"
+                  <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors"
                           onclick="return confirm('Are you sure you want to delete this record?')">
                     Delete
                   </button>
                 </form>
               </td>
-            </tr>
-          </c:forEach>
+            </c:if>
+          </tr>
+        </c:forEach>
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<%@ include file="add.jsp"%>
+<c:if test="${user.role eq 'Admin'}">
+
+  <%@ include file="add.jsp"%>
+
+</c:if>
