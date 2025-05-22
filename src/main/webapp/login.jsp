@@ -1,0 +1,1 @@
+<%@ include file='header.jsp' %><link rel='stylesheet' href='style.css'><div class='container'><h2>Login</h2><form action='user' method='post'><input type='hidden' name='action' value='login'>Username: <input type='text' name='username'><br>Password: <input type='password' name='password'><br><button type='submit'>Login</button></form></div><%@ include file='footer.jsp' %>

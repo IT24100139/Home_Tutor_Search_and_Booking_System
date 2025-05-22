@@ -1,0 +1,1 @@
+<%@ include file='header.jsp' %><link rel='stylesheet' href='style.css'><div class='container'><h2 style='color:red;'>Error: <%= request.getAttribute("error") %></h2><a href='register.jsp'>Try Registering</a></div><%@ include file='footer.jsp' %>

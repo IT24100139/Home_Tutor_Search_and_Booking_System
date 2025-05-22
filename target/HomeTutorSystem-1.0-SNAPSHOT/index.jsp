@@ -1,0 +1,1 @@
+<%@ include file='header.jsp' %><link rel='stylesheet' href='style.css'><div class='container'><h2>Home</h2><a href='register.jsp'>Register</a> | <a href='login.jsp'>Login</a></div><%@ include file='footer.jsp' %>

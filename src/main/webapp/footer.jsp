@@ -1,0 +1,1 @@
+<footer>&copy; 2025 Home Tutor System | Designed for Students</footer>
